@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import asdict, dataclass
-import sys
+from pyclbr import Class
 
 
 @dataclass
@@ -11,7 +11,7 @@ class InfoMessage:
     distance: float
     speed: float
     calories: float
-    INFO = (
+    INFO: str = (
         'Тип тренировки: {training_type}; Длительность: {duration:.3f} ч.; '
         'Дистанция: {distance:.3f} км; Ср. скорость: {speed:.3f} км/ч; '
         'Потрачено ккал: {calories:.3f}.'
@@ -56,9 +56,6 @@ class Training:
 @dataclass
 class Running(Training):
     """Тренировка: бег."""
-    action: int       # количество шагов
-    duration: float   # длительность тренировки в часах
-    weight: float     # вес спортсмена в килограммах
 
     COEFF_CALORIE_RUNNING_1: int = 18
     # коэффициент для расчета калорий при беге
@@ -78,16 +75,9 @@ class Running(Training):
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float,
-                 height: int,
-                 ) -> None:
-        self.action = action       # количество шагов
-        self.duration = duration   # длительность тренировки в часах
-        self.weight = weight       # вес спортсмена в килограммах
-        self.height = height       # рост спортсмена в сантиметрах
+    def __init__(self, action, duration, weight, height) -> None:
+        super().__init__(action, duration, weight)
+        self.height: int = height       # рост спортсмена в сантиметрах
 
     COEFF_CALORIE_SPORTWALKING_1: float = 0.035
     # коэффициент для расчета калорий при спортивной хотьбе
@@ -114,13 +104,13 @@ class Swimming(Training):
                  duration: float,
                  weight: float,
                  length_pool: float,
-                 count_pool: float,
+                 count_pool: int,
                  ) -> None:
         self.action = action            # количество гребков
         self.duration = duration        # длительность тренировки в часах
         self.weight = weight            # вес спортсмена в килограммах
         self.length_pool = length_pool  # длина бассейна в метрах
-        self.count_pool = count_pool   # сколько раз спортсмен переплыл бассейн
+        self.count_pool = count_pool  # сколько раз спортсмен переплыл бассейн
 
     LEN_STEP: float = 1.38
     # длина гребка
@@ -145,15 +135,16 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    TRAINING_DICT = {
+    TRAINING_DICT: dict[str, Class] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
-    if TRAINING_DICT.get(workout_type):
+    try:
+        TRAINING_DICT.get(workout_type)
         return TRAINING_DICT[workout_type](*data)
-    else:
-        sys.exit(f'Такого типа тренировки нет: "{workout_type}"')
+    except Exception:
+        raise RuntimeError(f'Такого типа тренировки нет: "{workout_type}"')
 
 
 def main(training: Training) -> None:
