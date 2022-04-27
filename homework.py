@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import asdict, dataclass
-from pyclbr import Class
+from typing import Type
 
 
 @dataclass
@@ -106,11 +106,16 @@ class Swimming(Training):
                  length_pool: float,
                  count_pool: int,
                  ) -> None:
-        self.action = action            # количество гребков
-        self.duration = duration        # длительность тренировки в часах
-        self.weight = weight            # вес спортсмена в килограммах
-        self.length_pool = length_pool  # длина бассейна в метрах
-        self.count_pool = count_pool  # сколько раз спортсмен переплыл бассейн
+        self.action: int = action
+        # количество гребков
+        self.duration: float = duration
+        # длительность тренировки в часах
+        self.weight: float = weight
+        # вес спортсмена в килограммах
+        self.length_pool: float = length_pool
+        # длина бассейна в метрах
+        self.count_pool: int = count_pool
+        # сколько раз спортсмен переплыл бассейн
 
     LEN_STEP: float = 1.38
     # длина гребка
@@ -135,13 +140,12 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    TRAINING_DICT: dict[str, Class] = {
+    TRAINING_DICT: Type[Training] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
     try:
-        TRAINING_DICT.get(workout_type)
         return TRAINING_DICT[workout_type](*data)
     except Exception:
         raise RuntimeError(f'Такого типа тренировки нет: "{workout_type}"')
